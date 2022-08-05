@@ -1,12 +1,39 @@
+import './App.css'
 import React, { useState } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
-import './App.css'
+const ImgixAPI = require('imgix-management-js')
 
 function App() {
   const [image, setImage] = useState()
   const [cropData, setCropData] = useState('#')
   const [cropper, setCropper] = useState()
+  let arrSearchImgix = []
+  const [arrImgixSearched, setImgixSearchArray] = useState([])
+
+  async function searchPictureTags(searchItemSent) {
+    console.log(`searchItem is: ` + searchItemSent)
+
+    const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
+    console.log(`imgix_api_key is: ` + imgix_api_key)
+
+    const imgix = new ImgixAPI({
+      apiKey: `${imgix_api_key}`,
+    })
+
+    await imgix
+      .request(`assets/622f76522d67dbae5fb46268?filter[tags]=` + searchItemSent)
+      .then((response) => {
+        console.log(response)
+
+        for (var i = 0; i < response.data.length; i++) {
+          arrSearchImgix.push(response.data[i].attributes.origin_path)
+        }
+        setImgixSearchArray(arrSearchImgix)
+        console.log(arrImgixSearched)
+        return response
+      })
+  }
 
   const onChange = (e) => {
     e.preventDefault()
@@ -35,6 +62,9 @@ function App() {
   return (
     <div>
       <div style={{ width: '100%' }}>
+        <button onClick={() => searchPictureTags('Dog')}>
+          Dog button for management js call
+        </button>
         <h1>Srcset Generator</h1>
         <input type="file" onChange={onChange} />
         <button>Use default img</button>
