@@ -2,6 +2,8 @@ import './App.css'
 import React, { useState } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
+window.Buffer = window.Buffer || require('buffer').Buffer
+
 const ImgixAPI = require('imgix-management-js')
 
 function App() {
@@ -22,7 +24,7 @@ function App() {
     })
 
     await imgix
-      .request(`assets/622f76522d67dbae5fb46268?filter[tags]=` + searchItemSent)
+      .request(`assets/62e31fcb03d7afea23063596?filter[tags]=` + searchItemSent)
       .then((response) => {
         console.log(response)
 
@@ -35,6 +37,30 @@ function App() {
       })
   }
 
+  async function uploadPicturesToSource(data) {
+    const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
+    console.log(`uploadPicturesTOSource - imgix_api_key is: ` + imgix_api_key)
+
+    const imgix = new ImgixAPI({
+      apiKey: `${imgix_api_key}`,
+    })
+    //console.log(data)
+
+    await imgix
+      .request(`sources/upload/62e31fcb03d7afea23063596/emma.jpeg`, {
+        method: 'POST',
+        body: data,
+      })
+      .then((response) => {
+        console.log(`response is: ` + response)
+
+        return response
+      })
+      .catch((err) => {
+        console.log(`ERROR HERE: ` + err.response.data)
+      })
+  }
+
   const onChange = (e) => {
     e.preventDefault()
     let files
@@ -43,10 +69,12 @@ function App() {
     } else if (e.target) {
       files = e.target.files
     }
+    console.log(files)
     const reader = new FileReader()
     reader.onload = () => {
       setImage(reader.result)
-      console.log(reader.result)
+      // console.log(reader)
+      uploadPicturesToSource(reader.result)
     }
     reader.readAsDataURL(files[0])
   }
