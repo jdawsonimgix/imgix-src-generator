@@ -10,52 +10,48 @@ function App() {
   const [image, setImage] = useState()
   const [cropData, setCropData] = useState('#')
   const [cropper, setCropper] = useState()
-  let arrSearchImgix = []
-  const [arrImgixSearched, setImgixSearchArray] = useState([])
+  // let arrSearchImgix = []
+  // const [arrImgixSearched, setImgixSearchArray] = useState([])
 
-  async function searchPictureTags(searchItemSent) {
-    console.log(`searchItem is: ` + searchItemSent)
+  // async function searchPictureTags(searchItemSent) {
+  //   console.log(`searchItem is: ` + searchItemSent)
 
-    const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
-    console.log(`imgix_api_key is: ` + imgix_api_key)
+  //   const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
+  //   console.log(`imgix_api_key is: ` + imgix_api_key)
 
-    const imgix = new ImgixAPI({
-      apiKey: `${imgix_api_key}`,
-    })
+  //   const imgix = new ImgixAPI({
+  //     apiKey: `${imgix_api_key}`,
+  //   })
 
-    await imgix
-      .request(`assets/62e31fcb03d7afea23063596?filter[tags]=` + searchItemSent)
-      .then((response) => {
-        console.log(response)
+  //   await imgix
+  //     .request(`assets/62e31fcb03d7afea23063596?filter[tags]=` + searchItemSent)
+  //     .then((response) => {
+  //       console.log(response)
 
-        for (var i = 0; i < response.data.length; i++) {
-          arrSearchImgix.push(response.data[i].attributes.origin_path)
-        }
-        setImgixSearchArray(arrSearchImgix)
-        console.log(arrImgixSearched)
-        return response
-      })
-  }
+  //       for (var i = 0; i < response.data.length; i++) {
+  //         arrSearchImgix.push(response.data[i].attributes.origin_path)
+  //       }
+  //       setImgixSearchArray(arrSearchImgix)
+  //       console.log(arrImgixSearched)
+  //       return response
+  //     })
+  // }
 
   async function uploadPicturesToSource(data) {
     const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
-    console.log(`uploadPicturesTOSource - imgix_api_key is: ` + imgix_api_key)
 
     const imgix = new ImgixAPI({
       apiKey: `${imgix_api_key}`,
     })
-    //console.log(data)
+
+    let buffer = Buffer.from(data, 'base64')
 
     await imgix
-      .request(`sources/upload/62e31fcb03d7afea23063596/emma.jpeg`, {
+      .request(`sources/upload/62e31fcb03d7afea23063596/test2.jpeg`, {
         method: 'POST',
-        body: data,
+        body: buffer,
       })
-      .then((response) => {
-        console.log(`response is: ` + response)
-
-        return response
-      })
+      .then((response) => console.log(JSON.stringify(response, null, 2)))
       .catch((err) => {
         console.log(`ERROR HERE: ` + err.response.data)
       })
@@ -69,11 +65,12 @@ function App() {
     } else if (e.target) {
       files = e.target.files
     }
-    console.log(files)
     const reader = new FileReader()
     reader.onload = () => {
       setImage(reader.result)
-      // console.log(reader)
+
+      console.log(`reader.result is : ` + reader.result)
+
       uploadPicturesToSource(reader.result)
     }
     reader.readAsDataURL(files[0])
@@ -90,9 +87,9 @@ function App() {
   return (
     <div>
       <div style={{ width: '100%' }}>
-        <button onClick={() => searchPictureTags('Dog')}>
+        {/* <button onClick={() => searchPictureTags('Dog')}>
           Dog button for management js call
-        </button>
+        </button> */}
         <h1>Srcset Generator</h1>
         <input type="file" onChange={onChange} />
         <button>Use default img</button>
