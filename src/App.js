@@ -67,7 +67,7 @@ function App() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      console.log('setTimeOut baseURL is' + JSON.stringify(baseURL))
+      console.log('setTimeOut baseURL is' + baseURL)
     }, 3000)
     return () => clearTimeout(timer)
   }, [baseURL])
