@@ -1,62 +1,44 @@
 import './App.css'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
 window.Buffer = window.Buffer || require('buffer').Buffer
-
-const ImgixAPI = require('imgix-management-js')
 
 function App() {
   const [image, setImage] = useState()
   const [cropData, setCropData] = useState('#')
   const [cropper, setCropper] = useState()
-  // let arrSearchImgix = []
-  // const [arrImgixSearched, setImgixSearchArray] = useState([])
+  var [baseURL, setBaseUrl] = useState('THIS SHOULD CHANGE')
 
-  // async function searchPictureTags(searchItemSent) {
-  //   console.log(`searchItem is: ` + searchItemSent)
-
-  //   const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
-  //   console.log(`imgix_api_key is: ` + imgix_api_key)
-
-  //   const imgix = new ImgixAPI({
-  //     apiKey: `${imgix_api_key}`,
-  //   })
-
-  //   await imgix
-  //     .request(`assets/62e31fcb03d7afea23063596?filter[tags]=` + searchItemSent)
-  //     .then((response) => {
-  //       console.log(response)
-
-  //       for (var i = 0; i < response.data.length; i++) {
-  //         arrSearchImgix.push(response.data[i].attributes.origin_path)
-  //       }
-  //       setImgixSearchArray(arrSearchImgix)
-  //       console.log(arrImgixSearched)
-  //       return response
-  //     })
+  // async function settingBaseURLFunction(data) {
+  //   console.log('Found settingBaseURLFunction')
+  //   console.log('what data is sent to settingsBaseURLFunction: ' + data.name)
+  //   setBaseUrl('Jamie update')
+  //   console.log('baseURL inside settingsBaseURLFUnction is now: ' + baseURL)
   // }
 
   async function uploadPicturesToSource(data) {
-    const imgix_api_key = process.env.REACT_APP_IMGIX_KEY
+    console.log(data)
+    console.log(data.name)
+    console.log(data.type)
+    setBaseUrl(data)
+    console.log('BaseURL ')
 
-    const imgix = new ImgixAPI({
-      apiKey: `${imgix_api_key}`,
-    })
-
-    let buffer = Buffer.from(data, 'base64')
-
-    await imgix
-      .request(`sources/upload/62e31fcb03d7afea23063596/test2.jpeg`, {
+    await fetch(
+      `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
+        data.name,
+      {
         method: 'POST',
-        body: buffer,
-      })
-      .then((response) => console.log(JSON.stringify(response, null, 2)))
-      .catch((err) => {
-        console.log(`ERROR HERE: ` + err.response.data)
-      })
+        body: data,
+        headers: {
+          Authorization: 'Bearer ' + process.env.REACT_APP_IMGIX_KEY,
+          'Content-Type': data.type,
+        },
+      },
+    )
+    console.log('Base URL in uploadPictureToSource is :' + baseURL)
   }
-
+  //
   const onChange = (e) => {
     e.preventDefault()
     let files
@@ -68,12 +50,11 @@ function App() {
     const reader = new FileReader()
     reader.onload = () => {
       setImage(reader.result)
-
-      console.log(`reader.result is : ` + reader.result)
-
-      uploadPicturesToSource(reader.result)
+      uploadPicturesToSource(files[0])
     }
     reader.readAsDataURL(files[0])
+    setBaseUrl(files[0].name)
+    console.log('Base URL in onChange is :' + baseURL)
   }
 
   const getCropData = () => {
@@ -84,12 +65,16 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('setTimeOut baseURL is' + JSON.stringify(baseURL))
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [baseURL])
+
   return (
     <div>
       <div style={{ width: '100%' }}>
-        {/* <button onClick={() => searchPictureTags('Dog')}>
-          Dog button for management js call
-        </button> */}
         <h1>Srcset Generator</h1>
         <input type="file" onChange={onChange} />
         <button>Use default img</button>
