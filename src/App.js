@@ -8,7 +8,8 @@ function App() {
   const [image, setImage] = useState()
   const [cropData, setCropData] = useState('#')
   const [cropper, setCropper] = useState()
-  var [baseURL, setBaseUrl] = useState('THIS SHOULD CHANGE')
+  const [baseURL, setBaseUrl] = useState('THIS SHOULD CHANGE')
+  const [testVar, setTest] = useState('one')
 
   // async function settingBaseURLFunction(data) {
   //   console.log('Found settingBaseURLFunction')
@@ -18,11 +19,11 @@ function App() {
   // }
 
   async function uploadPicturesToSource(data) {
-    console.log(data)
+    // console.log(data)
     console.log(data.name)
-    console.log(data.type)
-    setBaseUrl(data)
-    console.log('BaseURL ')
+    // console.log(data.type)
+    //setBaseUrl(data)
+    //console.log('BaseURL ')
 
     await fetch(
       `https://api.imgix.com/api/v1/sources/upload/62e31fcb03d7afea23063596/` +
@@ -36,9 +37,8 @@ function App() {
         },
       },
     )
-    console.log('Base URL in uploadPictureToSource is :' + baseURL)
   }
-  //
+
   const onChange = (e) => {
     e.preventDefault()
     let files
@@ -49,12 +49,11 @@ function App() {
     }
     const reader = new FileReader()
     reader.onload = () => {
-      setImage(reader.result)
+      setImage(reader.result) //adds it to display
       uploadPicturesToSource(files[0])
     }
     reader.readAsDataURL(files[0])
     setBaseUrl(files[0].name)
-    console.log('Base URL in onChange is :' + baseURL)
   }
 
   const getCropData = () => {
@@ -63,18 +62,21 @@ function App() {
       //console.log(cropper.getCroppedCanvas().toDataURL());
       // createRectUrl();
     }
-  }
+  } //
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      console.log('setTimeOut baseURL is' + baseURL)
-    }, 3000)
-    return () => clearTimeout(timer)
+    console.log('setTimeOut baseURL is' + baseURL)
   }, [baseURL])
+
+  const sayHello = () => {
+    setTest('Two')
+  }
 
   return (
     <div>
       <div style={{ width: '100%' }}>
+        <button onClick={sayHello}>CLICK TO TEST STATE</button>
+
         <h1>Srcset Generator</h1>
         <input type="file" onChange={onChange} />
         <button>Use default img</button>
